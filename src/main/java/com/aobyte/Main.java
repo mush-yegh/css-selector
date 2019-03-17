@@ -1,48 +1,73 @@
 package com.aobyte;
 
-import java.io.*;
+import java.io.File;
+import java.util.List;
+import java.util.Scanner;
+import java.util.ArrayList;
 
 public class Main {
-//    static ClassLoader classLoader = getClass().getClassLoader();
-//    private static File fileDir = new File(classLoader.getResource("index.html").getFile());
-    //private static String fileToRead = "index.html";
 
-    public static void main(String[] args){
-        StringBuilder html = new StringBuilder();
-        try{
-            File fileDir = new File("/home/java-duke/myJava/projects/css-selector/src/main/resources/index.html");
+    public static void main(String[] args) {
+        Parser parser = null;
+        Selector selector = null;
+        Scanner sc = new Scanner(System.in);
 
-            BufferedReader bufferedReader =
-                    new BufferedReader(new InputStreamReader(new FileInputStream(fileDir), "UTF8"));
+        System.out.println(".---------------------------------------------------------.");
+        System.out.println("|                          OPTIONS                        |");
+        System.out.println("| [F] - file path. [S] - selector. [D] - drow. [Q] - quit |");
+        System.out.println(" --------------------------------------------------------- ");
+        System.out.println(" \nPlease enter the command: ");
+        while (true) {
+            String command = sc.nextLine();
+            switch (command) {
+                case "F":
+                    System.out.println("Please enter file absolute path:");
+                    String path = sc.nextLine();
+                    System.out.println("path is: " + path);
 
-            String line;
+                    File file = new File(path);
+                    if (file.exists() && file.isFile()) {
+                        parser = new Parser(file);
+                    }
+                    break;
+                case "S":
+                    System.out.println("Please enter selector:");
+                    String query = sc.nextLine();
+                    System.out.println("tagToSelect is: " + query);
 
-            while ((line = bufferedReader.readLine()) != null) {
-                html.append(line+"\n");
+                    selector = new Selector(query);
+                    break;
+                case "D":
+
+                    Printer printer = new Printer();
+                    if (parser != null && selector != null) {
+                        List<Tag> htmlTags = parser.getHtmlTags();
+                        List<Tag> queriedTags = selector.getSelectorTag();
+                        ArrayList<Integer> matchingTagIds = parser.getMatchingTagIds(queriedTags);
+
+                        List<Tag> tagsToPrint = parser.getTagsToPrint(matchingTagIds);
+                            //System.out.println("tagsToPrint = " + tagsToPrint);
+
+                        printer.printSelectedTags(tagsToPrint, htmlTags);
+                        System.out.println();
+                    }else{
+                        System.out.println("Ooops... (incorrect filPath / query)");
+                    }
+                    break;
+                case "Q":
+                    System.out.println("Bye!");
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println("Command not found!");
+                    break;
             }
-
-            bufferedReader.close();
-            System.out.println(html.toString());
-        }catch (UnsupportedEncodingException e){
-            System.out.println("1 "+e.getMessage());
-        }catch (IOException e){
-            System.out.println("2 "+e.getMessage());
-        }catch (Exception e){
-            System.out.println("3 "+e.getMessage());
         }
-
-        //getTagStartIndex("body", html);
-        //getTagEndIndex("body", html);
-        String strBody = html.substring(getTagStartIndex("body", html), getTagEndIndex("body", html));
-        System.out.println(strBody);
     }
 
-    private static int getTagStartIndex(String tagName, StringBuilder html){//NullPointerException − if param is null.
-        System.out.println("index of " + "<"+tagName+">" + " is: "+ html.indexOf("<"+tagName+">"));
-        return html.indexOf("<"+tagName+">");
-    }
-    private static int getTagEndIndex(String tagName, StringBuilder html){
-        System.out.println("index of " + "<"+tagName+">" + " is: "+ html.indexOf("</"+tagName+">"));
-        return html.indexOf("</"+tagName+">")+("</"+tagName+">").length();
-    }
+
 }
+
+
+
+
